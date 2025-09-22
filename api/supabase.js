@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Create Supabase client for server-side use
 const supabase = createClient(
@@ -6,4 +6,4 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY // Use service role for server-side operations
 );
 
-module.exports = supabase;
+export default supabase;

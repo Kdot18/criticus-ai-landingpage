@@ -1,4 +1,4 @@
-const supabase = require('./supabase.js');
+import supabase from './supabase.js';
 
 export default async function handler(req, res) {
   // Set CORS headers
