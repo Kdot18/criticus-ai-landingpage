@@ -1,8 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
-const Database = require('./database.js');
-
-// Initialize database
-const db = new Database();
+const supabase = require('./supabase.js');
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -57,26 +53,35 @@ export default async function handler(req, res) {
       });
     }
 
-    // Generate ID and create demo request
-    const requestId = uuidv4();
+    // Insert into Supabase
+    const { data, error } = await supabase
+      .from('demo_requests')
+      .insert([
+        {
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          institution_type: institutionType,
+          institution_name: institutionName.trim(),
+          role
+        }
+      ])
+      .select();
 
-    await db.createDemoRequest({
-      id: requestId,
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      institutionType,
-      institutionName: institutionName.trim(),
-      role
-    });
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({
+        error: 'Failed to submit demo request',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
 
     res.status(201).json({
       message: 'Demo request submitted successfully!',
-      id: requestId
+      id: data[0].id
     });
 
   } catch (error) {
     console.error('Demo request error:', error);
-
     res.status(500).json({
       error: 'Failed to submit demo request',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined

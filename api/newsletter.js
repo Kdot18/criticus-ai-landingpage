@@ -1,8 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
-const Database = require('./database.js');
-
-// Initialize database
-const db = new Database();
+const supabase = require('./supabase.js');
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -36,33 +32,41 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    const subscriptionId = uuidv4();
-    const currentTime = new Date().toISOString();
+    // Insert into Supabase
+    const { data, error } = await supabase
+      .from('newsletter_subscriptions')
+      .insert([
+        {
+          name: name.trim(),
+          email: email.toLowerCase().trim()
+        }
+      ])
+      .select();
 
-    // Insert newsletter subscription into database
-    await db.addNewsletterSubscription({
-      id: subscriptionId,
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      created_at: currentTime
-    });
+    if (error) {
+      console.error('Supabase error:', error);
+
+      // Handle duplicate email error
+      if (error.code === '23505') {
+        return res.status(409).json({
+          error: 'This email is already subscribed to our newsletter!'
+        });
+      }
+
+      return res.status(500).json({
+        error: 'Failed to subscribe to newsletter',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
 
     res.status(201).json({
       success: true,
       message: 'Newsletter subscription successful!',
-      data: { id: subscriptionId }
+      data: { id: data[0].id }
     });
 
   } catch (error) {
     console.error('Newsletter subscription error:', error);
-
-    // Handle duplicate email error
-    if (error.message && error.message.includes('UNIQUE constraint failed')) {
-      return res.status(409).json({
-        error: 'This email is already subscribed to our newsletter!'
-      });
-    }
-
     res.status(500).json({
       error: 'Failed to subscribe to newsletter',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined

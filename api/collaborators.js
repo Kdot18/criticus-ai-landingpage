@@ -1,8 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
-const Database = require('./database.js');
-
-// Initialize database
-const db = new Database();
+const supabase = require('./supabase.js');
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -52,37 +48,45 @@ export default async function handler(req, res) {
       });
     }
 
-    const applicationId = uuidv4();
-    const currentTime = new Date().toISOString();
+    // Insert into Supabase
+    const { data, error } = await supabase
+      .from('collaborator_applications')
+      .insert([
+        {
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          institution_type: institutionType,
+          institution_name: institutionName.trim(),
+          role: role,
+          why_collaborate: whyCollaborate.trim()
+        }
+      ])
+      .select();
 
-    // Insert collaborator application into database
-    await db.addCollaboratorApplication({
-      id: applicationId,
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      institution_type: institutionType,
-      institution_name: institutionName.trim(),
-      role: role,
-      why_collaborate: whyCollaborate.trim(),
-      created_at: currentTime
-    });
+    if (error) {
+      console.error('Supabase error:', error);
+
+      // Check for duplicate email
+      if (error.code === '23505') {
+        return res.status(409).json({
+          error: 'Email already has a pending collaborator application'
+        });
+      }
+
+      return res.status(500).json({
+        error: 'Failed to submit collaborator application',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
 
     res.status(201).json({
       success: true,
       message: 'Collaborator application submitted successfully!',
-      data: { id: applicationId }
+      data: { id: data[0].id }
     });
 
   } catch (error) {
     console.error('Collaborator application error:', error);
-
-    // Check for duplicate email
-    if (error.message && error.message.includes('UNIQUE constraint failed')) {
-      return res.status(409).json({
-        error: 'Email already has a pending collaborator application'
-      });
-    }
-
     res.status(500).json({
       error: 'Failed to submit collaborator application',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined

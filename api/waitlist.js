@@ -1,8 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
-const Database = require('./database.js');
-
-// Initialize database
-const db = new Database();
+const supabase = require('./supabase.js');
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -52,33 +48,43 @@ export default async function handler(req, res) {
       });
     }
 
-    // Generate ID and create signup
-    const signupId = uuidv4();
+    // Insert into Supabase
+    const { data, error } = await supabase
+      .from('waitlist_signups')
+      .insert([
+        {
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          university: university.trim(),
+          role,
+          how_heard_about_us: howHeardAboutUs
+        }
+      ])
+      .select();
 
-    await db.createWaitlistSignup({
-      id: signupId,
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      university: university.trim(),
-      role,
-      howHeardAboutUs
-    });
+    if (error) {
+      console.error('Supabase error:', error);
+
+      // Handle duplicate email error
+      if (error.code === '23505') {
+        return res.status(409).json({
+          error: 'This email is already on our waitlist!'
+        });
+      }
+
+      return res.status(500).json({
+        error: 'Failed to add to waitlist',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
 
     res.status(201).json({
       message: 'Successfully added to waitlist!',
-      id: signupId
+      id: data[0].id
     });
 
   } catch (error) {
     console.error('Waitlist signup error:', error);
-
-    // Handle duplicate email error
-    if (error.message && error.message.includes('UNIQUE constraint failed')) {
-      return res.status(409).json({
-        error: 'This email is already on our waitlist!'
-      });
-    }
-
     res.status(500).json({
       error: 'Failed to add to waitlist',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
