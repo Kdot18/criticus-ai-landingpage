@@ -112,7 +112,7 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
         setTimeout(() => {
           resetForm();
           onOpenChange(false);
-        }, 3000);
+        }, 15000);
       } else {
         setSubmitStatus("error");
         setSubmitMessage(data.error || "Something went wrong. Please try again.");

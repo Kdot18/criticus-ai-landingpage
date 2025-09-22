@@ -112,7 +112,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
         setTimeout(() => {
           resetForm();
           onOpenChange(false);
-        }, 2000);
+        }, 15000);
       } else {
         setSubmitStatus("error");
         setSubmitMessage(data.error || "Something went wrong. Please try again.");

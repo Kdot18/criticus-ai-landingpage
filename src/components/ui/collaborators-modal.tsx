@@ -119,7 +119,7 @@ export function CollaboratorsModal({ open, onOpenChange }: CollaboratorsModalPro
         setTimeout(() => {
           resetForm();
           onOpenChange(false);
-        }, 3000);
+        }, 15000);
       } else {
         setSubmitStatus("error");
         setSubmitMessage(data.error || "Something went wrong. Please try again.");

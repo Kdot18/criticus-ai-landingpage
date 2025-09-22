@@ -84,7 +84,7 @@ export function NewsletterModal({ open, onOpenChange }: NewsletterModalProps) {
         setTimeout(() => {
           resetForm();
           onOpenChange(false);
-        }, 3000);
+        }, 15000);
       } else {
         setSubmitStatus("error");
         setSubmitMessage(data.error || "Something went wrong. Please try again.");
