@@ -116,11 +116,15 @@ All colors MUST be HSL.
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
   }
 }
 

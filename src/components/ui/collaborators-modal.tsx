@@ -21,7 +21,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
-interface DemoModalProps {
+interface CollaboratorsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -32,6 +32,7 @@ interface FormData {
   institutionType: string;
   institutionName: string;
   role: string;
+  whyCollaborate: string;
 }
 
 interface FormErrors {
@@ -40,15 +41,17 @@ interface FormErrors {
   institutionType?: string;
   institutionName?: string;
   role?: string;
+  whyCollaborate?: string;
 }
 
-export function DemoModal({ open, onOpenChange }: DemoModalProps) {
+export function CollaboratorsModal({ open, onOpenChange }: CollaboratorsModalProps) {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     institutionType: "",
     institutionName: "",
     role: "",
+    whyCollaborate: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -81,6 +84,10 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
       newErrors.role = "Please select your role";
     }
 
+    if (!formData.whyCollaborate.trim()) {
+      newErrors.whyCollaborate = "Please tell us why you want to collaborate";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -94,7 +101,7 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
     setSubmitStatus("idle");
 
     try {
-      const response = await fetch("/api/demo", {
+      const response = await fetch("/api/collaborators", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -106,7 +113,7 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
 
       if (response.ok) {
         setSubmitStatus("success");
-        setSubmitMessage("Thank you! Your demo request has been submitted. We'll be in touch soon to schedule your personalized demo.");
+        setSubmitMessage("Thank you for your interest in collaborating! We'll review your application and get back to you soon.");
 
         // Reset form after successful submission
         setTimeout(() => {
@@ -132,6 +139,7 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
       institutionType: "",
       institutionName: "",
       role: "",
+      whyCollaborate: "",
     });
     setErrors({});
     setSubmitStatus("idle");
@@ -139,6 +147,15 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
+    // For the whyCollaborate field, enforce word limit
+    if (field === "whyCollaborate") {
+      const wordCount = value.trim().split(/\s+/).filter(word => word.length > 0).length;
+      if (wordCount > 100 && value.trim() !== "") {
+        // If over limit, don't update the value
+        return;
+      }
+    }
+
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -178,13 +195,13 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md bg-neutral-900 border-neutral-700 text-white">
+      <DialogContent className="sm:max-w-md bg-neutral-900 border-neutral-700 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            Book a Demo
+            Join as Collaborator
           </DialogTitle>
           <DialogDescription className="text-center text-neutral-400">
-            Educators, book a demo to see how we can integrate education-first AI tools into your classrooms!
+            Partner with us to build the next generation of education tools!
           </DialogDescription>
         </DialogHeader>
 
@@ -312,9 +329,28 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
               {errors.role && <p className="text-red-400 text-sm">{errors.role}</p>}
             </div>
 
-            {/* Disclaimers */}
-            <div className="text-xs text-neutral-400 leading-relaxed pt-2">
-              Criticus AI will use your information to provide the content or service you requested. We may use your information to send you marketing emails. You can unsubscribe at any time using the link in our emails.
+            <div className="space-y-2">
+              <Label htmlFor="whyCollaborate" className="text-white">
+                Why do you want to collaborate? *
+              </Label>
+              <textarea
+                id="whyCollaborate"
+                value={formData.whyCollaborate}
+                onChange={(e) => handleInputChange("whyCollaborate", e.target.value)}
+                placeholder="Tell us about your interest in collaborating with Criticus AI..."
+                className="w-full min-h-[80px] px-3 py-2 text-sm bg-neutral-800 border border-neutral-600 text-white placeholder:text-neutral-400 focus:border-blue-500 rounded-md resize-y"
+                disabled={isSubmitting}
+              />
+              <div className="flex justify-between items-center">
+                {errors.whyCollaborate && <p className="text-red-400 text-sm">{errors.whyCollaborate}</p>}
+                <p className={`text-xs ml-auto ${
+                  formData.whyCollaborate.trim().split(/\s+/).filter(word => word.length > 0).length >= 100
+                    ? 'text-red-400'
+                    : 'text-neutral-500'
+                }`}>
+                  {formData.whyCollaborate.trim().split(/\s+/).filter(word => word.length > 0).length}/100 words
+                </p>
+              </div>
             </div>
 
             <DialogFooter className="gap-2 pt-4">
@@ -338,7 +374,7 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
                     Submitting...
                   </>
                 ) : (
-                  "Request Demo"
+                  "Apply to Collaborate"
                 )}
               </Button>
             </DialogFooter>

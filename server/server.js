@@ -155,6 +155,122 @@ app.post('/api/demo', async (req, res) => {
   }
 });
 
+// Newsletter signup endpoint
+app.post('/api/newsletter', async (req, res) => {
+  try {
+    const { name, email } = req.body;
+
+    // Validate input
+    if (!name || !email) {
+      return res.status(400).json({
+        error: 'All fields are required: name, email'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    const subscriptionId = uuidv4();
+    const currentTime = new Date().toISOString();
+
+    // Insert newsletter subscription into database
+    await db.addNewsletterSubscription({
+      id: subscriptionId,
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      created_at: currentTime
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Newsletter subscription successful!',
+      data: { id: subscriptionId }
+    });
+
+  } catch (error) {
+    console.error('Newsletter subscription error:', error);
+
+    // Check for duplicate email
+    if (error.message && error.message.includes('UNIQUE constraint failed')) {
+      return res.status(409).json({
+        error: 'Email already subscribed to newsletter'
+      });
+    }
+
+    res.status(500).json({
+      error: 'Failed to subscribe to newsletter',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Collaborators signup endpoint
+app.post('/api/collaborators', async (req, res) => {
+  try {
+    const { name, email, institutionType, institutionName, role, whyCollaborate } = req.body;
+
+    // Validate input
+    if (!name || !email || !institutionType || !institutionName || !role || !whyCollaborate) {
+      return res.status(400).json({
+        error: 'All fields are required: name, email, institutionType, institutionName, role, whyCollaborate'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Validate institution type
+    const validInstitutionTypes = ['high-school', 'community-college', 'university'];
+    if (!validInstitutionTypes.includes(institutionType)) {
+      return res.status(400).json({
+        error: 'Invalid institution type. Must be high-school, community-college, or university'
+      });
+    }
+
+    const applicationId = uuidv4();
+    const currentTime = new Date().toISOString();
+
+    // Insert collaborator application into database
+    await db.addCollaboratorApplication({
+      id: applicationId,
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      institution_type: institutionType,
+      institution_name: institutionName.trim(),
+      role: role,
+      why_collaborate: whyCollaborate.trim(),
+      created_at: currentTime
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Collaborator application submitted successfully!',
+      data: { id: applicationId }
+    });
+
+  } catch (error) {
+    console.error('Collaborator application error:', error);
+
+    // Check for duplicate email
+    if (error.message && error.message.includes('UNIQUE constraint failed')) {
+      return res.status(409).json({
+        error: 'Email already has a pending collaborator application'
+      });
+    }
+
+    res.status(500).json({
+      error: 'Failed to submit collaborator application',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // Admin endpoints (for viewing data)
 app.get('/api/admin/waitlist', async (req, res) => {
   try {

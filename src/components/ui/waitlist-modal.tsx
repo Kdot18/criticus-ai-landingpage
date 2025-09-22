@@ -70,7 +70,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
     }
 
     if (!formData.university.trim()) {
-      newErrors.university = "University is required";
+      newErrors.university = "University or institution is required";
     }
 
     if (!formData.role) {
@@ -117,7 +117,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
         setSubmitStatus("error");
         setSubmitMessage(data.error || "Something went wrong. Please try again.");
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus("error");
       setSubmitMessage("Network error. Please check your connection and try again.");
     } finally {
@@ -214,13 +214,13 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 
             <div className="space-y-2">
               <Label htmlFor="university" className="text-white">
-                University *
+                University or Institution *
               </Label>
               <Input
                 id="university"
                 value={formData.university}
                 onChange={(e) => handleInputChange("university", e.target.value)}
-                placeholder="Enter your university here"
+                placeholder="Enter your university or institution here"
                 className="bg-neutral-800 border-neutral-600 text-white placeholder:text-neutral-400 focus:border-blue-500"
                 disabled={isSubmitting}
               />
@@ -244,6 +244,9 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                   </SelectItem>
                   <SelectItem value="administrator" className="text-white hover:bg-neutral-700">
                     Administrator
+                  </SelectItem>
+                  <SelectItem value="other" className="text-white hover:bg-neutral-700">
+                    Other
                   </SelectItem>
                 </SelectContent>
               </Select>

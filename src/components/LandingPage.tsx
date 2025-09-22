@@ -3,12 +3,16 @@ import WebGLErrorBoundary from "@/components/ui/WebGLErrorBoundary";
 import { Footer } from "@/components/ui/footer";
 import { WaitlistModal } from "@/components/ui/waitlist-modal";
 import { DemoModal } from "@/components/ui/demo-modal";
-import { ChevronDown, Twitter, Linkedin } from "lucide-react";
+import { NewsletterModal } from "@/components/ui/newsletter-modal";
+import { CollaboratorsModal } from "@/components/ui/collaborators-modal";
+import { ChevronDown, Linkedin } from "lucide-react";
 import { useState } from "react";
 
 const LandingPage = () => {
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [isNewsletterModalOpen, setIsNewsletterModalOpen] = useState(false);
+  const [isCollaboratorsModalOpen, setIsCollaboratorsModalOpen] = useState(false);
 
   const scrollToContent = () => {
     const contentSection = document.getElementById('content-section');
@@ -31,7 +35,7 @@ const LandingPage = () => {
               Criticus AI
             </h1>
             <p className="max-w-3xl mx-auto text-lg md:text-xl lg:text-2xl text-white/80 font-medium">
-              Redefining Education - where artificial intelligence meets authentic learning.
+              Expanding Education - where artificial intelligence drives authentic learning.
             </p>
           </div>
 
@@ -88,7 +92,7 @@ const LandingPage = () => {
                   Although AI advancements have been occurring at light-speed for the past half-decade, there are still key flaws in many areas, leaving gaps in the market that slow-down the development of AI tools for specific use-cases. The education system's understanding of these advancements lags behind the rapidly accelerating capabilities of this technology - leaving educators and students stuck in a place of uncertainty. Although resources like Large Language Models can be used in the educational environment, the lack of deep personalization paired with the misalignment of fundamental education values creates major difficulty in implementation. To bridge this gap, we are building Criticus AI to make AI systems that are trustworthy, value-aligned, and classroom-ready.
                 </p>
                 <p className="text-xl md:text-2xl font-semibold text-white pt-4">
-                  At Criticus AI, we have a singular goal - redefine the way students interface with AI, setting a precedent that the AI learning environment needs to be based on building critical thinking skills instead of replacing them - full stop.
+                  At Criticus AI, we have a singular goal - redefine the way students interface with AI, setting a precedent that the AI learning environment needs to be based on <em>building</em> critical thinking skills instead of replacing them - full stop.
                 </p>
 
                 <div className="space-y-6 pt-8">
@@ -135,7 +139,7 @@ const LandingPage = () => {
                     We are building education-first AI that delivers first-in-class assistance to educators and an effective educational experience to students. Our goal is to combine cutting-edge engineering, meticulous research, and boundless creativity to bring forth the next generation of educational tools, and we're looking for collaborators to help us bring this vision to life.
                   </p>
                   <p>
-                    Follow along with our Newsletters for updates along the way and join the waitlist if you are a student excited for our platform drop!
+                    Follow along with our <button onClick={() => setIsNewsletterModalOpen(true)} className="text-blue-400 hover:text-blue-300 underline bg-transparent border-none cursor-pointer p-0">newsletters</button> for updates along the way, <button onClick={() => setIsWaitlistModalOpen(true)} className="text-blue-400 hover:text-blue-300 underline bg-transparent border-none cursor-pointer p-0">join the waitlist</button> if you are a student excited for our platform drop, and apply to <button onClick={() => setIsCollaboratorsModalOpen(true)} className="text-blue-400 hover:text-blue-300 underline bg-transparent border-none cursor-pointer p-0">collaborate</button> if you are an educator aligned with our vision!
                   </p>
                 </div>
               </div>
@@ -153,22 +157,23 @@ const LandingPage = () => {
           logo={<></>}
           brandName="Criticus AI"
           socialLinks={[
-            {
-              icon: <Twitter className="h-5 w-5" />,
-              href: "https://twitter.com",
-              label: "Twitter",
-            },
+            // {
+            //   icon: <Twitter className="h-5 w-5" />,
+            //   href: "https://twitter.com",
+            //   label: "Twitter",
+            // },
             {
               icon: <Linkedin className="h-5 w-5" />,
-              href: "https://linkedin.com",
+              href: "/linkedin",
               label: "LinkedIn",
             },
           ]}
           mainLinks={[
-            { href: "/about", label: "About" },
-            { href: "/contact", label: "Contact" },
-            { href: "/blog", label: "Blog" },
-            { href: "/careers", label: "Careers" },
+            // { href: "/about", label: "About" },
+            // { href: "/contact", label: "Contact" },
+            { href: "#", label: "Newsletter", onClick: () => setIsNewsletterModalOpen(true) },
+            { href: "#", label: "Collaborators", onClick: () => setIsCollaboratorsModalOpen(true) },
+            // { href: "/careers", label: "Careers" },
           ]}
           legalLinks={[
             { href: "/privacy", label: "Privacy Policy" },
@@ -192,6 +197,16 @@ const LandingPage = () => {
       <DemoModal
         open={isDemoModalOpen}
         onOpenChange={setIsDemoModalOpen}
+      />
+      {/* Newsletter Modal */}
+      <NewsletterModal
+        open={isNewsletterModalOpen}
+        onOpenChange={setIsNewsletterModalOpen}
+      />
+      {/* Collaborators Modal */}
+      <CollaboratorsModal
+        open={isCollaboratorsModalOpen}
+        onOpenChange={setIsCollaboratorsModalOpen}
       />
     </div>
   );
